@@ -1,25 +1,50 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { trendingRecipes } from './data';
 import CategoryCard from '../components/CategoryCard';
 import TrendingCard from '../components/TrendingCard';
 import { useNavigation } from '@react-navigation/core';
 import { MaterialCommunityIcons} from '@expo/vector-icons';
+import auth from '@react-native-firebase/auth';
 
 /*Component Images*/
 const characterImg = require('../assets/character.png');
 const buritoImg = require('../assets/burito.png');
 
 const Home = () => {
-  const navigation = useNavigation();
+    // Set an initializing state whilst Firebase connects
+    const [initializing, setInitializing] = useState(true);
+    const [user, setUser] = useState();
+    const navigation = useNavigation();
+  
+    // Handle user state changes
+    function onAuthStateChanged(user) {
+      setUser(user);
+      if (initializing){
+        setInitializing(false);
+      }{
+        navigation.navigate("Tabs")
+      }
+    }
+  
+    useEffect(() => {
+      const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+      //return a promise after user logs in(unsubscribe) since onStateChange() is async
+      return subscriber;
+    }, []);
+
+    if (initializing) return null;
 
   function renderHeader(){
+    let {displayName} = user;
+    const firstName = displayName.split(' ')[0];
     return(
         <>
         <View style={styles.listHeaderContainer}>
             {/*Text*/}
             <View style={{flex: 1}}>
-                <Text style={styles.greetingText}>Hello User</Text>
+                <Text style={styles.greetingText}>Hello {firstName}</Text>
                 <Text style={styles.questionText}>Anything you want to cook?</Text>
             </View>
             <TouchableOpacity>

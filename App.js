@@ -1,11 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
+
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './screens/Login';
-import Home from './screens/Home';
 import Recipe from './screens/Recipe';
 import Tabs from './components/Tabs';
+//importing development build
+import 'expo-dev-client';
+
 
 const Stack = createNativeStackNavigator();
 

@@ -3,6 +3,7 @@
     "name": "recipe-app",
     "slug": "recipe-app",
     "version": "1.0.0",
+    "plugins": ["@react-native-google-signin/google-signin"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -21,13 +22,20 @@
       "supportsTablet": true
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.mandlenkosi.recipeapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b6df368f-f7ca-4599-b6c0-7bf9902a27c5"
+      }
     }
   }
 }
