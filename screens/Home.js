@@ -1,11 +1,11 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, {useContext, useEffect} from 'react';
 import { StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { trendingRecipes } from './data';
 import CategoryCard from '../components/CategoryCard';
 import TrendingCard from '../components/TrendingCard';
 import { useNavigation } from '@react-navigation/core';
 import { MaterialCommunityIcons} from '@expo/vector-icons';
+import { Context } from '../components/Context';
 import auth from '@react-native-firebase/auth';
 
 /*Component Images*/
@@ -13,41 +13,34 @@ const characterImg = require('../assets/character.png');
 const buritoImg = require('../assets/burito.png');
 
 const Home = () => {
-    // Set an initializing state whilst Firebase connects
-    const [initializing, setInitializing] = useState(true);
-    const [user, setUser] = useState();
-    const navigation = useNavigation();
+  const navigation = useNavigation();
+  const context = useContext(Context);
+  let [user, setUser] = context;
   
-    // Handle user state changes
-    function onAuthStateChanged(user) {
-      setUser(user);
-      if (initializing){
-        setInitializing(false);
-      }{
-        navigation.navigate("Tabs")
-      }
-    }
-  
-    useEffect(() => {
-      const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-      //return a promise after user logs in(unsubscribe) since onStateChange() is async
-      return subscriber;
-    }, []);
+  useEffect(()=>{
+    setUser(user)
+  }, [])
 
-    if (initializing) return null;
+  const signOut = async () => {
+    try {
+      await auth().signOut();
+      console.log('signed out')
+      setUser(null) // Remember to remove the user from your app's state as well
+    } catch (error) {
+      console.error(error, "error sign in");
+    }
+  };
 
   function renderHeader(){
-    let {displayName} = user;
-    const firstName = displayName.split(' ')[0];
     return(
         <>
         <View style={styles.listHeaderContainer}>
             {/*Text*/}
             <View style={{flex: 1}}>
-                <Text style={styles.greetingText}>Hello {firstName}</Text>
+                <Text style={styles.greetingText}>Hello User</Text>
                 <Text style={styles.questionText}>Anything you want to cook?</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={signOut}>
                 <Image source={characterImg} style={styles.profileImage}/>
             </TouchableOpacity>
         </View>
@@ -99,43 +92,49 @@ const Home = () => {
     )
   }
 
-  return (
-    <SafeAreaView style={styles.areaContainer}>
-        <FlatList
-          data={trendingRecipes}
-          keyExtractor={ item => item.id}
-          keyboardDismissMode='on-drag'
-          showsHorizontalScrollIndicator={false}
-          ListHeaderComponent={
-            <View>
-                {/*ListHeader Section*/}
-                {renderHeader()}
-                {/*ListSearchBar Section*/}
-                {renderSearchBar()}
-                {/*See Recipe*/}
-                {renderSeeRecipe()}
-                {/*TrendingSection*/}
-                {renderTrendingSection()}
-
-            </View>
-          }
-          renderItem={({item}) =>{
-            return (
-                <CategoryCard 
-                 categoryItem={item}
-                 containerStyle={{marginHorizontal: 24}}
-                 onPress={()=> navigation.navigate('Recipe', {recipe: item})}
-                 />
-            )
-          }}
-          ListFooterComponent={
-            <View style={{marginBottom: 100}}/>
-          }
-          />
-
-
-    </SafeAreaView>
-  )
+  if(user === null){
+    navigation.navigate("Login")
+    return <View></View>
+  }
+  else{
+    return (
+        <SafeAreaView style={styles.areaContainer}>
+            <FlatList
+              data={trendingRecipes}
+              keyExtractor={ item => item.id}
+              keyboardDismissMode='on-drag'
+              showsHorizontalScrollIndicator={false}
+              ListHeaderComponent={
+                <View>
+                    {/*ListHeader Section*/}
+                    {renderHeader()}
+                    {/*ListSearchBar Section*/}
+                    {renderSearchBar()}
+                    {/*See Recipe*/}
+                    {renderSeeRecipe()}
+                    {/*TrendingSection*/}
+                    {renderTrendingSection()}
+    
+                </View>
+              }
+              renderItem={({item}) =>{
+                return (
+                    <CategoryCard 
+                     categoryItem={item}
+                     containerStyle={{marginHorizontal: 24}}
+                     onPress={()=> navigation.navigate('Recipe', {recipe: item})}
+                     />
+                )
+              }}
+              ListFooterComponent={
+                <View style={{marginBottom: 100}}/>
+              }
+              />
+    
+    
+        </SafeAreaView>
+      )
+  }
 }
 
 export default Home

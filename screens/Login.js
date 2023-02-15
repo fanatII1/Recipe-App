@@ -1,30 +1,26 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext  } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, StatusBar, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/core';
 //firebase authentication object
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { Context } from '../components/Context';
 
-GoogleSignin.configure({
-  webClientId: '933844165393-un4or2l6rdt3kemssvgk1je4i9dsvdvg.apps.googleusercontent.com'
-});
+//screen height
+const { height } = Dimensions.get('window');
 
-//screen height and width
-const { width, height } = Dimensions.get('window');
 const Login = () => {
+  const context = useContext(Context);
+  let [user, setUser] = context;
+  console.log('III', user)
   // Set an initializing state whilst Firebase connects
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
   const navigation = useNavigation();
 
   // Handle user state changes
   function onAuthStateChanged(user) {
-    setUser(user);
-    if (initializing){
-      setInitializing(false);
-    }{
+    if(user !== null){
+      setUser(user)
       navigation.navigate("Tabs")
     }
   }
@@ -35,19 +31,23 @@ const Login = () => {
     return subscriber;
   }, []);
 
-  if (initializing) return null;
-
   //authenticate via google
   async function googleLogin() {
-    // Check if device supports Google Play
+    try{
+          // Check if device supports Google Play
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    // Get the users ID token
+    // Prompts a modal to let the user sign  Get the users ID token
     const { idToken } = await GoogleSignin.signIn();  
     // Create a Google credential with the token
     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
 
-    // Sign-in the user with the credential
-    return auth().signInWithCredential(googleCredential);
+    // Sign-in the user with the credential(firebase)
+    const signInUser = await  auth().signInWithCredential(googleCredential);
+    console.log(signInUser, 'logged in')
+    }
+    catch(error){
+      console.log(error, "sign in error")
+    }
   }
 
   /*Header Section*/
@@ -63,6 +63,16 @@ const Login = () => {
     );
   }
 
+  const signOut = async () => {
+    try {
+      await auth().signOut();
+      console.log('signed out')
+      setUser(null) // Remember to remove the user from your app's state as well
+    } catch (error) {
+      console.error(error, "error sign in");
+    }
+  };
+
   /*Details Section*/
   function renderDetails() {
     return (
@@ -74,7 +84,7 @@ const Login = () => {
           </Text>
         </View>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={() => googleLogin().then(()=> console.log('in'))}>
+          <TouchableOpacity onPress={googleLogin}>
             <LinearGradient
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
@@ -84,7 +94,7 @@ const Login = () => {
               <Text style={styles.loginText}>Login</Text>
             </LinearGradient>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.signUpBtn} onPress={() => googleLogin().then(()=>  navigation.navigate("Tabs"))}>
+          <TouchableOpacity style={styles.signUpBtn} onPress={signOut}>
             <Text style={styles.signUpText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -98,7 +108,7 @@ const Login = () => {
 
       {renderHeader()}
       {/*if user not authenticated(user value did not change after initialized(false)), we render details*/}
-      {!user ? renderDetails() : null}
+      {renderDetails()}
     </View>
   );
 };
