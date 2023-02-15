@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { trendingRecipes } from './data';
 import CategoryCard from '../components/CategoryCard';
@@ -12,6 +12,7 @@ const characterImg = require('../assets/character.png');
 const buritoImg = require('../assets/burito.png');
 
 const Home = () => {
+  const [recipeData, setRecipeData] = useState(trendingRecipes);
   const navigation = useNavigation();
   const context = useContext(Context);
   let [user, setUser] = context; 
@@ -37,15 +38,28 @@ const Home = () => {
     )
   }
 
+  const filterRecipes = (text) => {
+    let regExFilter = RegExp(`.*${text.toLowerCase().split('').join('.*')}.*`)
+    const filteredTrendingRecipes = trendingRecipes.filter((recipe)=>{
+      let {name} = recipe;
+      return name.toLowerCase().match(regExFilter)
+    })
+    if(filteredTrendingRecipes === "" || " "){
+      setRecipeData(trendingRecipes)
+    }
+    setRecipeData(filteredTrendingRecipes)
+  }
+
   function renderSearchBar(){
     return(
         <View style={styles.searchBarContainer}>
             <MaterialCommunityIcons name='magnify' size={30} style={styles.searchIcon}/>
             <TextInput 
-                style={styles.textInput} 
-                placeholderTextColor='black'
-                placeholder='Search Recipes'
-                />
+              style={styles.textInput} 
+              placeholderTextColor='black'
+              placeholder='Search Recipes'
+              onChangeText={(text) => filterRecipes(text)}
+            />
         </View>
     )
   }
@@ -68,7 +82,7 @@ const Home = () => {
         <View style={styles.trendingSectionContainer}>
             <Text style={styles.trendingSectionHeading}>Trending Recipe</Text>
             <FlatList
-              data={trendingRecipes}
+              data={recipeData}
               horizontal
               showsHorizontalScrollIndicator={false}
               renderItem={({item, index})=>{
