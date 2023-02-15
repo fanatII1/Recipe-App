@@ -17,6 +17,7 @@ const Home = () => {
   const context = useContext(Context);
   let [user, setUser] = context;
   
+  
   useEffect(()=>{
     setUser(user)
   }, [])
