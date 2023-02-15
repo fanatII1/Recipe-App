@@ -6,7 +6,6 @@ import TrendingCard from '../components/TrendingCard';
 import { useNavigation } from '@react-navigation/core';
 import { MaterialCommunityIcons} from '@expo/vector-icons';
 import { Context } from '../components/Context';
-import auth from '@react-native-firebase/auth';
 
 /*Component Images*/
 const characterImg = require('../assets/character.png');
@@ -15,22 +14,11 @@ const buritoImg = require('../assets/burito.png');
 const Home = () => {
   const navigation = useNavigation();
   const context = useContext(Context);
-  let [user, setUser] = context;
-  
+  let [user, setUser] = context; 
   
   useEffect(()=>{
     setUser(user)
   }, [])
-
-  const signOut = async () => {
-    try {
-      await auth().signOut();
-      console.log('signed out')
-      setUser(null) // Remember to remove the user from your app's state as well
-    } catch (error) {
-      console.error(error, "error sign in");
-    }
-  };
 
   function renderHeader(){
     return(
@@ -92,6 +80,17 @@ const Home = () => {
         </View>
     )
   }
+
+  /*signOut user from the app*/
+  const signOut = async () => {
+    try {
+      await auth().signOut();
+      console.log('signed out')
+      setUser(null) // Remember to remove the user from your app's state as well
+    } catch (error) {
+      console.error(error, "error sign in");
+    }
+  };
 
   if(user === null){
     navigation.navigate("Login")

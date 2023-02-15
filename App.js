@@ -1,22 +1,19 @@
-import { createContext, useState, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/core';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './screens/Login';
 import Recipe from './screens/Recipe';
 import Tabs from './components/Tabs';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { Context } from './components/Context';
-//importing development build
-import 'expo-dev-client';
-
-const Stack = createNativeStackNavigator();
-
+import 'expo-dev-client'; //importing development build
 
 GoogleSignin.configure({
   webClientId: '933844165393-un4or2l6rdt3kemssvgk1je4i9dsvdvg.apps.googleusercontent.com',
 });
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   // Set an initializing state whilst Firebase connects
@@ -34,12 +31,3 @@ export default function App() {
     </Context.Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

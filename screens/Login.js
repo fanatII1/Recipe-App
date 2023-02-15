@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext  } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, StatusBar, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/core';
@@ -11,44 +11,49 @@ import { Context } from '../components/Context';
 const { height } = Dimensions.get('window');
 
 const Login = () => {
+  //Access user global authentication state from context
   const context = useContext(Context);
   let [user, setUser] = context;
-  console.log('III', user)
-  // Set an initializing state whilst Firebase connects
   const navigation = useNavigation();
 
   // Handle user state changes
+  // if logged in, we navigate to tabs
   function onAuthStateChanged(user) {
-    if(user !== null){
-      setUser(user)
-      navigation.navigate("Tabs")
+    if (user !== null) {
+      setUser(user);
+      navigation.navigate('Tabs');
     }
   }
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    //return a promise after user logs in(unsubscribe) since onStateChange() is async
+    // Return a promise after user logs in(unsubscribe) since onStateChange() is async
     return subscriber;
   }, []);
 
-  //authenticate via google
+  // Authenticate via google
+  // Check GooglePlay support, create prompt modal with idToken, create google credentials and use credetials to sign into Firebase
   async function googleLogin() {
-    try{
-          // Check if device supports Google Play
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    // Prompts a modal to let the user sign  Get the users ID token
-    const { idToken } = await GoogleSignin.signIn();  
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-    // Sign-in the user with the credential(firebase)
-    const signInUser = await  auth().signInWithCredential(googleCredential);
-    console.log(signInUser, 'logged in')
-    }
-    catch(error){
-      console.log(error, "sign in error")
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const { idToken } = await GoogleSignin.signIn();
+      
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      await auth().signInWithCredential(googleCredential);
+    } catch (error) {
+      console.log(error, 'sign in error');
     }
   }
+
+  // Handle user sign outs
+  const signOut = async () => {
+    try {
+      await auth().signOut();
+      setUser(null); // Remember to remove the user from your app's state as well
+    } catch (error) {
+      console.error(error, 'error sign in');
+    }
+  };
 
   /*Header Section*/
   function renderHeader() {
@@ -62,16 +67,6 @@ const Login = () => {
       </View>
     );
   }
-
-  const signOut = async () => {
-    try {
-      await auth().signOut();
-      console.log('signed out')
-      setUser(null) // Remember to remove the user from your app's state as well
-    } catch (error) {
-      console.error(error, "error sign in");
-    }
-  };
 
   /*Details Section*/
   function renderDetails() {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Octicons} from '@expo/vector-icons';
 import Home from '../screens/Home';
@@ -10,7 +10,6 @@ const Tabs = () => {
 
   /*Tab Icons*/
   function TabIcon({focused, icon}){
-
     return(
         <View style={{alignItems: 'center', justifyContent: 'center', height: 80, width: 80}}>
             <Octicons 
@@ -66,5 +65,3 @@ const Tabs = () => {
 }
 
 export default Tabs
-
-const styles = StyleSheet.create({})
